@@ -1,0 +1,371 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import DifficultyBadge from '../../components/DifficultyBadge.astro';
+import FeaturePill from '../../components/FeaturePill.astro';
+import CrossLinkCard from '../../components/CrossLinkCard.astro';
+import { resolveLinks, getGlossaryBacklinksForCookbook } from '../../lib/cross-links';
+
+export async function getStaticPaths() {
+  const all = await getCollection('cookbooks');
+  return all.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+
+const difficultyMap: Record<string, 'beginner' | 'intermediate' | 'advanced' | 'expert'> = {
+  beginner: 'beginner',
+  intermediate: 'intermediate',
+  advanced: 'advanced',
+};
+
+const categoryLabels: Record<string, string> = {
+  'automation': 'Automation',
+  'code-quality': 'Code Quality',
+  'project-setup': 'Project Setup',
+  'ci-cd': 'CI/CD',
+  'team-workflows': 'Team Workflows',
+};
+
+const categoryLabel = categoryLabels[entry.data.category] ?? entry.data.category;
+
+// Resolve prerequisites to real titles
+const resolvedPrereqs = await resolveLinks(entry.data.prerequisites);
+
+// Resolve features_used (glossary slugs) to real titles
+const resolvedFeatures = await resolveLinks(
+  entry.data.features_used.map((f) => `glossary/${f}`)
+);
+
+// Build canonical link for this cookbook (for backlink lookup)
+const cookbookLink = `cookbooks/${entry.id}`;
+const glossaryBacklinks = await getGlossaryBacklinksForCookbook(cookbookLink);
+const hasGlossaryBacklinks = glossaryBacklinks.length > 0;
+---
+
+<BaseLayout title={entry.data.title} description={entry.data.description}>
+  <div class="cookbook-page">
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="/cookbooks">Cookbooks</a>
+      <span aria-hidden="true">›</span>
+      <a href={`/cookbooks?category=${entry.data.category}`}>{categoryLabel}</a>
+      <span aria-hidden="true">›</span>
+      <span>{entry.data.title}</span>
+    </nav>
+
+    <div class="cookbook-layout">
+      <article class="cookbook-main">
+        <!-- Header -->
+        <header class="cookbook-header">
+          <div class="cookbook-meta">
+            <DifficultyBadge difficulty={difficultyMap[entry.data.difficulty]} />
+            <span class="category-badge">{categoryLabel}</span>
+          </div>
+          <h1 class="cookbook-title">{entry.data.title}</h1>
+          <p class="cookbook-description">{entry.data.description}</p>
+        </header>
+
+        <!-- Features Used -->
+        {entry.data.features_used.length > 0 && (
+          <section class="features-section">
+            <h2 class="section-label">Features Used</h2>
+            <div class="feature-pills">
+              {entry.data.features_used.map((f) => (
+                <FeaturePill name={f} href={`/glossary/${f}`} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        <!-- Prerequisites -->
+        {resolvedPrereqs.length > 0 && (
+          <section class="prereq-section">
+            <h2 class="section-label">Prerequisites</h2>
+            <div class="prereq-links">
+              {resolvedPrereqs.map((prereq) => (
+                <CrossLinkCard
+                  href={prereq.href}
+                  pillar={prereq.pillar}
+                  title={prereq.title}
+                  preview="Read this first"
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
+        <hr class="divider" />
+
+        <!-- Main content -->
+        <div class="prose">
+          <Content />
+        </div>
+
+        <!-- Cross-links at bottom -->
+        {(resolvedPrereqs.length > 0 || resolvedFeatures.length > 0 || hasGlossaryBacklinks) && (
+          <aside class="bottom-links">
+            <h3 class="bottom-links-title">Continue Learning</h3>
+            <div class="bottom-links-grid">
+              {resolvedPrereqs.map((prereq) => (
+                <CrossLinkCard
+                  href={prereq.href}
+                  pillar={prereq.pillar}
+                  title={prereq.title}
+                  preview="Related storybook chapter"
+                />
+              ))}
+              {resolvedFeatures.map((feat) => (
+                <CrossLinkCard
+                  href={feat.href}
+                  pillar={feat.pillar}
+                  title={feat.title}
+                  preview={feat.preview}
+                />
+              ))}
+            </div>
+
+            {hasGlossaryBacklinks && (
+              <div class="referenced-section">
+                <h3 class="bottom-links-title">Referenced in Glossary</h3>
+                <div class="bottom-links-grid">
+                  {glossaryBacklinks.map((g) => (
+                    <CrossLinkCard
+                      href={`/glossary/${g.id}`}
+                      pillar="glossary"
+                      title={g.data.title}
+                      preview={`Glossary — ${g.data.category}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </aside>
+        )}
+      </article>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .cookbook-page {
+    max-width: var(--page-width);
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+  }
+
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .breadcrumb a {
+    color: var(--color-text-muted);
+  }
+
+  .breadcrumb a:hover {
+    color: var(--color-accent);
+  }
+
+  .cookbook-layout {
+    max-width: var(--content-width);
+  }
+
+  .cookbook-header {
+    margin-bottom: 2rem;
+  }
+
+  .cookbook-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .category-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+  }
+
+  .cookbook-title {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--color-text);
+    margin-bottom: 0.75rem;
+  }
+
+  .cookbook-description {
+    font-size: 1.05rem;
+    color: var(--color-text-muted);
+    line-height: 1.65;
+  }
+
+  .section-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-muted);
+    margin-bottom: 0.6rem;
+  }
+
+  .features-section {
+    margin-bottom: 1.5rem;
+  }
+
+  .feature-pills {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+
+  .prereq-section {
+    margin-bottom: 1.5rem;
+  }
+
+  .prereq-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--color-border);
+    margin: 2rem 0;
+  }
+
+  /* Prose */
+  .prose {
+    font-size: 1rem;
+    line-height: 1.75;
+  }
+
+  .prose :global(h2) {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 2.5rem 0 1rem;
+    color: var(--color-text);
+  }
+
+  .prose :global(h3) {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin: 2rem 0 0.75rem;
+    color: var(--color-text);
+  }
+
+  .prose :global(p) {
+    margin-bottom: 1.25rem;
+  }
+
+  .prose :global(ul),
+  .prose :global(ol) {
+    margin: 0.75rem 0 1.25rem 1.5rem;
+  }
+
+  .prose :global(li) {
+    margin-bottom: 0.4rem;
+  }
+
+  .prose :global(a) {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .prose :global(blockquote) {
+    border-left: 4px solid var(--color-border);
+    padding-left: 1rem;
+    color: var(--color-text-muted);
+    font-style: italic;
+    margin: 1.5rem 0;
+  }
+
+  .prose :global(hr) {
+    border: none;
+    border-top: 1px solid var(--color-border);
+    margin: 2rem 0;
+  }
+
+  .bottom-links {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .bottom-links-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .referenced-section {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .bottom-links-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 0.75rem;
+  }
+
+  /* Code blocks scroll, don't overflow */
+  .prose :global(pre) {
+    overflow-x: auto;
+    max-width: 100%;
+    white-space: pre;
+  }
+
+  /* Markdown tables */
+  .prose :global(table) {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 768px) {
+    .cookbook-page {
+      padding: 1.5rem 1.25rem 3rem;
+    }
+
+    .cookbook-title {
+      font-size: 1.5rem;
+    }
+
+    .bottom-links-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .feature-pills {
+      gap: 0.35rem;
+    }
+
+    .breadcrumb {
+      font-size: 0.8rem;
+      gap: 0.35rem;
+    }
+  }
+</style>

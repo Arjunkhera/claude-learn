@@ -1,0 +1,91 @@
+---
+interface Props {
+  href: string;
+  pillar: '101' | '201' | '301' | '401' | 'cookbook' | 'glossary';
+  title: string;
+  preview: string;
+}
+
+const { href, pillar, title, preview } = Astro.props;
+
+const pillarConfig: Record<string, { icon: string; label: string; color: string }> = {
+  '101': { icon: '📘', label: '101 Starter', color: 'var(--color-101)' },
+  '201': { icon: '📗', label: '201 Practitioner', color: 'var(--color-201)' },
+  '301': { icon: '📙', label: '301 Builder', color: 'var(--color-301)' },
+  '401': { icon: '📕', label: '401 Expert', color: 'var(--color-401)' },
+  'cookbook': { icon: '🍳', label: 'Cookbook', color: 'var(--color-accent)' },
+  'glossary': { icon: '📖', label: 'Glossary', color: 'var(--color-text-muted)' },
+};
+
+const { icon, label, color } = pillarConfig[pillar] ?? pillarConfig['glossary'];
+---
+
+<a href={href} class="cross-link-card">
+  <div class="card-icon" aria-hidden="true">{icon}</div>
+  <div class="card-content">
+    <div class="card-title">{title}</div>
+    <div class="card-preview">{preview}</div>
+  </div>
+  <span class="card-badge" style={`--badge-color: ${color};`}>{label}</span>
+</a>
+
+<style>
+  .cross-link-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    text-decoration: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .cross-link-card:hover {
+    border-color: var(--color-accent);
+    box-shadow: 0 2px 8px rgba(232, 89, 12, 0.1);
+    text-decoration: none;
+  }
+
+  .card-icon {
+    font-size: 1.25rem;
+    line-height: 1;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+
+  .card-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .card-title {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--color-text);
+    margin-bottom: 0.2rem;
+  }
+
+  .card-preview {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .card-badge {
+    flex-shrink: 0;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--badge-color);
+    background: color-mix(in srgb, var(--badge-color) 10%, transparent);
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--badge-color) 25%, transparent);
+    white-space: nowrap;
+    margin-top: 0.1rem;
+  }
+</style>

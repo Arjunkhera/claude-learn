@@ -1,0 +1,109 @@
+---
+interface Props {
+  filename?: string;
+  lang?: string;
+}
+
+const { filename } = Astro.props;
+---
+
+<div class="code-block">
+  {filename && <div class="code-filename">{filename}</div>}
+  <div class="code-wrapper">
+    <slot />
+    <button class="copy-btn" aria-label="Copy code">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.copy-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const wrapper = btn.closest('.code-wrapper');
+      const pre = wrapper?.querySelector('pre');
+      const text = pre?.textContent ?? '';
+      navigator.clipboard.writeText(text).then(() => {
+        btn.setAttribute('data-copied', 'true');
+        setTimeout(() => btn.removeAttribute('data-copied'), 2000);
+      });
+    });
+  });
+</script>
+
+<style>
+  .code-block {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin: 1.5rem 0;
+    border: 1px solid #313244;
+  }
+
+  .code-filename {
+    background: #181825;
+    color: #a6adc8;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    padding: 0.5rem 1.25rem;
+    border-bottom: 1px solid #313244;
+  }
+
+  .code-wrapper {
+    position: relative;
+    background: #1e1e2e;
+    overflow: hidden;
+  }
+
+  .code-wrapper :global(pre) {
+    margin: 0;
+    border-radius: 0;
+    border: none;
+    overflow-x: auto;
+    max-width: 100%;
+    /* Pad right so long lines aren't hidden behind copy button */
+    padding-right: 3rem;
+  }
+
+  .copy-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: #313244;
+    border: none;
+    color: #a6adc8;
+    padding: 0.35rem 0.5rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.15s, background 0.15s;
+    /* Stay above scrollable content */
+    z-index: 1;
+  }
+
+  .code-wrapper:hover .copy-btn,
+  .copy-btn:focus-visible {
+    opacity: 1;
+  }
+
+  .copy-btn:hover {
+    background: #45475a;
+    color: #cdd6f4;
+  }
+
+  .copy-btn[data-copied] {
+    color: #a6e3a1;
+    background: #1e3a2f;
+  }
+
+  /* On touch devices always show the copy button */
+  @media (hover: none) {
+    .copy-btn {
+      opacity: 1;
+    }
+  }
+</style>

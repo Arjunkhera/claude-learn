@@ -1,0 +1,193 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Home">
+  <div class="hero">
+    <h1>Learn Claude Code</h1>
+    <p class="subtitle">From first-timer to power user. Progressive examples, real workflows, complete reference.</p>
+    <div class="search-bar">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
+      </svg>
+      <input type="text" placeholder="Search features, workflows, concepts..." />
+    </div>
+  </div>
+
+  <section class="pillars">
+    <a href="/storybooks" class="pillar-card">
+      <span class="pillar-icon">📖</span>
+      <h2>Storybooks</h2>
+      <p>Progressive learning tracks. Pick your level and read like a book.</p>
+    </a>
+    <a href="/cookbooks" class="pillar-card">
+      <span class="pillar-icon">👨‍🍳</span>
+      <h2>Cookbooks</h2>
+      <p>Real workflows combining multiple features. Copy and adapt.</p>
+    </a>
+    <a href="/glossary" class="pillar-card">
+      <span class="pillar-icon">📚</span>
+      <h2>Glossary</h2>
+      <p>Every feature. Full detail. Searchable reference.</p>
+    </a>
+    <a href="/changelog" class="pillar-card">
+      <span class="pillar-icon">📢</span>
+      <h2>Changelog</h2>
+      <p>What just shipped? Stay up to date with new features.</p>
+    </a>
+  </section>
+
+  <section class="quickstart">
+    <p>Not sure where to start? <a href="/storybooks/101">Try 101 Foundations →</a></p>
+  </section>
+</BaseLayout>
+
+<script>
+  // Navigate to /search?q=<query> when the user presses Enter in the hero search bar
+  const input = document.querySelector<HTMLInputElement>('.hero .search-bar input');
+  input?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && input.value.trim()) {
+      window.location.href = `/search?q=${encodeURIComponent(input.value.trim())}`;
+    }
+  });
+</script>
+
+<style>
+  .hero {
+    max-width: var(--page-width);
+    margin: 0 auto;
+    padding: 4rem 1.5rem 2rem;
+    text-align: center;
+  }
+
+  .hero h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+
+  .subtitle {
+    color: var(--color-text-muted);
+    font-size: 1.125rem;
+    margin-bottom: 2rem;
+  }
+
+  .search-bar {
+    max-width: 480px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+  }
+
+  .search-bar svg {
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+  }
+
+  .search-bar input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    font-family: var(--font-sans);
+    background: transparent;
+    color: var(--color-text);
+  }
+
+  .pillars {
+    max-width: var(--page-width);
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .pillar-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    text-decoration: none;
+    color: var(--color-text);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .pillar-card:hover {
+    border-color: var(--color-accent);
+    box-shadow: 0 4px 12px rgba(232, 89, 12, 0.08);
+    text-decoration: none;
+  }
+
+  .pillar-icon {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 0.75rem;
+  }
+
+  .pillar-card h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .pillar-card p {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .quickstart {
+    max-width: var(--page-width);
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+    text-align: center;
+  }
+
+  .quickstart p {
+    color: var(--color-text-muted);
+    font-size: 1rem;
+  }
+
+  .quickstart a {
+    font-weight: 600;
+  }
+
+  @media (max-width: 768px) {
+    .hero {
+      padding: 2.5rem 1.25rem 1.5rem;
+    }
+
+    .hero h1 {
+      font-size: 1.75rem;
+    }
+
+    .subtitle {
+      font-size: 1rem;
+    }
+
+    .search-bar {
+      max-width: 100%;
+      margin: 0;
+    }
+
+    .pillars {
+      padding: 1.5rem 1.25rem;
+    }
+
+    .quickstart {
+      padding: 1.5rem 1.25rem 3rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .pillars {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

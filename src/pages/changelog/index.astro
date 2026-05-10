@@ -1,0 +1,296 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { resolveLinks } from '../../lib/cross-links';
+
+const allEntries = await getCollection('changelog');
+
+// Sort by date descending
+const sortedEntries = allEntries.sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime()
+);
+
+// Render content and resolve cross_links for every entry
+const entries = await Promise.all(
+  sortedEntries.map(async (entry) => {
+    const { Content } = await render(entry);
+    const crossLinks = await resolveLinks(entry.data.cross_links);
+    return { entry, Content, crossLinks };
+  })
+);
+
+const badgeConfig: Record<string, { label: string; color: string }> = {
+  new: { label: 'New', color: 'var(--color-badge-new)' },
+  enhanced: { label: 'Enhanced', color: 'var(--color-badge-enhanced)' },
+  deprecated: { label: 'Deprecated', color: 'var(--color-badge-deprecated)' },
+};
+
+function formatDate(date: Date) {
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+}
+---
+
+<BaseLayout title="Changelog">
+  <div class="page">
+    <header class="page-header">
+      <h1>What's New</h1>
+      <p>Stay up to date with Claude Code features, enhancements, and changes.</p>
+    </header>
+
+    <div class="filters" role="group" aria-label="Filter by badge">
+      <button class="filter-pill active" data-filter="all">All</button>
+      <button class="filter-pill" data-filter="new">New</button>
+      <button class="filter-pill" data-filter="enhanced">Enhanced</button>
+      <button class="filter-pill" data-filter="deprecated">Deprecated</button>
+    </div>
+
+    <div class="entries">
+      {entries.map(({ entry, Content, crossLinks }) => {
+        const badge = badgeConfig[entry.data.badge] ?? { label: entry.data.badge, color: 'var(--color-text-muted)' };
+        return (
+          <article class="entry" data-badge={entry.data.badge}>
+            <div class="entry-header">
+              <div class="entry-meta">
+                <time class="entry-date" datetime={entry.data.date.toISOString()}>
+                  {formatDate(entry.data.date)}
+                </time>
+                <span
+                  class="entry-badge"
+                  style={`--badge-color: ${badge.color};`}
+                >
+                  {badge.label}
+                </span>
+              </div>
+              <h2 class="entry-title">{entry.data.title}</h2>
+            </div>
+
+            <div class="entry-body prose">
+              <Content />
+            </div>
+
+            {crossLinks.length > 0 && (
+              <div class="entry-links">
+                {crossLinks.map((link) => (
+                  <a
+                    href={link.href}
+                    class="entry-link-badge"
+                    style={`--link-color: ${
+                      link.pillar === 'cookbook' ? 'var(--color-accent)' :
+                      link.pillar === 'glossary' ? 'var(--color-text-muted)' :
+                      `var(--color-${link.pillar})`
+                    };`}
+                  >
+                    {link.pillar === 'cookbook' ? '🍳' :
+                     link.pillar === 'glossary' ? '📖' :
+                     link.pillar === '101' ? '📘' :
+                     link.pillar === '201' ? '📗' :
+                     link.pillar === '301' ? '📙' : '📕'}
+                    {' '}{link.title}
+                  </a>
+                ))}
+              </div>
+            )}
+          </article>
+        );
+      })}
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  // Client-side filtering by badge type
+  const filterButtons = document.querySelectorAll<HTMLButtonElement>('.filter-pill');
+  const entryEls = document.querySelectorAll<HTMLElement>('.entry');
+
+  filterButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const filter = btn.dataset.filter ?? 'all';
+
+      filterButtons.forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      entryEls.forEach((el) => {
+        if (filter === 'all' || el.dataset.badge === filter) {
+          el.style.display = '';
+        } else {
+          el.style.display = 'none';
+        }
+      });
+    });
+  });
+</script>
+
+<style>
+  .page {
+    max-width: var(--content-width);
+    margin: 0 auto;
+    padding: 3rem 1.5rem;
+  }
+
+  .page-header {
+    margin-bottom: 2rem;
+  }
+
+  .page-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .page-header p {
+    color: var(--color-text-muted);
+    font-size: 1.05rem;
+  }
+
+  .filters {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
+  }
+
+  .filter-pill {
+    padding: 0.4rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-surface);
+    font-size: 0.85rem;
+    font-family: var(--font-sans);
+    cursor: pointer;
+    color: var(--color-text-muted);
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+
+  .filter-pill.active {
+    background: var(--color-text);
+    color: white;
+    border-color: var(--color-text);
+  }
+
+  .filter-pill:hover:not(.active) {
+    border-color: var(--color-text-muted);
+    color: var(--color-text);
+  }
+
+  .entries {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .entry {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 1.75rem;
+  }
+
+  .entry-header {
+    margin-bottom: 1rem;
+  }
+
+  .entry-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .entry-date {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    font-weight: 500;
+  }
+
+  .entry-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--badge-color);
+    background: color-mix(in srgb, var(--badge-color) 10%, transparent);
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--badge-color) 25%, transparent);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .entry-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--color-text);
+    line-height: 1.3;
+  }
+
+  /* Prose inside entries */
+  .entry-body.prose {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--color-text-muted);
+    margin-bottom: 1.25rem;
+  }
+
+  .entry-body.prose :global(p) {
+    margin-bottom: 0.75rem;
+  }
+
+  .entry-body.prose :global(p:last-child) {
+    margin-bottom: 0;
+  }
+
+  .entry-body.prose :global(a) {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .entry-body.prose :global(code) {
+    font-size: 0.85em;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    padding: 0.1em 0.35em;
+  }
+
+  /* Cross-link badges */
+  .entry-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .entry-link-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--link-color);
+    background: color-mix(in srgb, var(--link-color) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--link-color) 20%, transparent);
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+    text-decoration: none;
+    transition: background 0.15s;
+  }
+
+  .entry-link-badge:hover {
+    background: color-mix(in srgb, var(--link-color) 15%, transparent);
+    text-decoration: none;
+  }
+
+  @media (max-width: 768px) {
+    .page-header h1 {
+      font-size: 1.5rem;
+    }
+
+    .entry {
+      padding: 1.25rem;
+    }
+  }
+</style>

@@ -1,0 +1,204 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import DifficultyBadge from '../../../components/DifficultyBadge.astro';
+
+export async function getStaticPaths() {
+  const tracks = ['101', '201', '301', '401'] as const;
+  return tracks.map((track) => ({ params: { track } }));
+}
+
+const { track } = Astro.params as { track: '101' | '201' | '301' | '401' };
+
+const allChapters = await getCollection('storybooks');
+const chapters = allChapters
+  .filter((entry) => entry.data.track === track)
+  .sort((a, b) => a.data.chapter - b.data.chapter);
+
+const trackMeta: Record<string, { name: string; description: string; difficulty: 'beginner' | 'intermediate' | 'advanced' | 'expert' }> = {
+  '101': { name: 'Starter', description: 'Learn the fundamentals of Claude Code — from installation to your first productive session.', difficulty: 'beginner' },
+  '201': { name: 'Practitioner', description: 'Go deeper with hooks, skills, and real workflows. Build habits that make Claude Code indispensable.', difficulty: 'intermediate' },
+  '301': { name: 'Builder', description: 'Design multi-step agents, custom integrations, and team-scale configurations.', difficulty: 'advanced' },
+  '401': { name: 'Expert', description: 'Master the internals. Build your own tools, extend the platform, and push the boundaries.', difficulty: 'expert' },
+};
+
+const meta = trackMeta[track];
+const title = `${track} ${meta.name} — Storybooks`;
+---
+
+<BaseLayout title={title} description={meta.description}>
+  <div class="track-page">
+    <header class="track-header">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="/storybooks">Storybooks</a>
+        <span aria-hidden="true">›</span>
+        <span>{track} {meta.name}</span>
+      </nav>
+      <div class="track-badge-row">
+        <DifficultyBadge difficulty={meta.difficulty} track={track} />
+      </div>
+      <h1 class="track-title">{track}: {meta.name}</h1>
+      <p class="track-description">{meta.description}</p>
+      <div class="track-stats">
+        <span>{chapters.length} chapter{chapters.length !== 1 ? 's' : ''}</span>
+      </div>
+    </header>
+
+    <section class="chapter-list">
+      {chapters.length === 0 ? (
+        <p class="empty">No chapters yet — content is coming soon.</p>
+      ) : (
+        chapters.map((chapter) => {
+          const slug = chapter.id.replace(/\.md$/, '').replace(/^[^/]+\//, '');
+          const href = `/storybooks/${track}/${slug}`;
+          return (
+            <a href={href} class="chapter-card">
+              <div class="chapter-number" aria-label={`Chapter ${chapter.data.chapter}`}>
+                {String(chapter.data.chapter).padStart(2, '0')}
+              </div>
+              <div class="chapter-info">
+                <div class="chapter-title">{chapter.data.title}</div>
+                {chapter.data.description && (
+                  <div class="chapter-desc">{chapter.data.description}</div>
+                )}
+              </div>
+              <span class="chapter-arrow" aria-hidden="true">→</span>
+            </a>
+          );
+        })
+      )}
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .track-page {
+    max-width: var(--page-width);
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+  }
+
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    margin-bottom: 1.25rem;
+  }
+
+  .breadcrumb a {
+    color: var(--color-text-muted);
+  }
+
+  .breadcrumb a:hover {
+    color: var(--color-accent);
+  }
+
+  .track-badge-row {
+    margin-bottom: 0.75rem;
+  }
+
+  .track-title {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 0.75rem;
+    color: var(--color-text);
+  }
+
+  .track-description {
+    font-size: 1.05rem;
+    color: var(--color-text-muted);
+    max-width: 600px;
+    line-height: 1.65;
+    margin-bottom: 1rem;
+  }
+
+  .track-stats {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    margin-bottom: 2.5rem;
+  }
+
+  .track-header {
+    margin-bottom: 2.5rem;
+    padding-bottom: 2.5rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .chapter-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .chapter-card {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.25rem 1.5rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    text-decoration: none;
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+  }
+
+  .chapter-card:hover {
+    border-color: var(--color-accent);
+    box-shadow: 0 2px 12px rgba(232, 89, 12, 0.1);
+    transform: translateX(2px);
+    text-decoration: none;
+  }
+
+  .chapter-number {
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    min-width: 2.5rem;
+    flex-shrink: 0;
+  }
+
+  .chapter-info {
+    flex: 1;
+  }
+
+  .chapter-title {
+    font-weight: 600;
+    font-size: 0.975rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .chapter-desc {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+  }
+
+  .chapter-arrow {
+    color: var(--color-accent);
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .chapter-card:hover .chapter-arrow {
+    opacity: 1;
+  }
+
+  .empty {
+    color: var(--color-text-muted);
+    font-style: italic;
+    padding: 2rem 0;
+  }
+
+  @media (max-width: 768px) {
+    .track-title {
+      font-size: 1.5rem;
+    }
+  }
+</style>

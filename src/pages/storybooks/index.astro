@@ -1,0 +1,121 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const tracks = [
+  { id: '101', name: '101 — Foundations', audience: 'Anyone starting Claude Code', chapters: 7, color: 'var(--color-101)' },
+  { id: '201', name: '201 — Practitioner', audience: 'Comfortable user going deeper', chapters: 7, color: 'var(--color-201)' },
+  { id: '301', name: '301 — Power User', audience: 'Wants full mastery', chapters: 7, color: 'var(--color-301)' },
+  { id: '401', name: '401 — Architect', audience: 'Building systems on Claude Code', chapters: 7, color: 'var(--color-401)' },
+];
+---
+
+<BaseLayout title="Storybooks">
+  <div class="page">
+    <header class="page-header">
+      <h1>Storybooks</h1>
+      <p>Pick your track and read like a book. Each chapter builds on the last.</p>
+    </header>
+
+    <div class="through-line">
+      <p><strong>Follow Arjun</strong> as he tames a messy Node.js monorepo using Claude Code — from first commands to full automation.</p>
+    </div>
+
+    <div class="tracks">
+      {tracks.map((track) => (
+        <a href={`/storybooks/${track.id}`} class="track-card">
+          <div class="track-badge" style={`background: ${track.color}`}>{track.id}</div>
+          <div class="track-info">
+            <h2>{track.name}</h2>
+            <p class="track-audience">{track.audience}</p>
+            <p class="track-meta">{track.chapters} chapters</p>
+          </div>
+        </a>
+      ))}
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .page {
+    max-width: var(--content-width);
+    margin: 0 auto;
+    padding: 3rem 1.5rem;
+  }
+
+  .page-header {
+    margin-bottom: 2rem;
+  }
+
+  .page-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .page-header p {
+    color: var(--color-text-muted);
+    font-size: 1.05rem;
+  }
+
+  .through-line {
+    background: var(--color-accent-light);
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+    margin-bottom: 2.5rem;
+    font-size: 0.925rem;
+  }
+
+  .tracks {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .track-card {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.5rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    color: var(--color-text);
+    transition: border-color 0.15s;
+  }
+
+  .track-card:hover {
+    border-color: var(--color-accent);
+    text-decoration: none;
+  }
+
+  .track-badge {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+  }
+
+  .track-info h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+
+  .track-audience {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+  }
+
+  .track-meta {
+    color: var(--color-text-muted);
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+  }
+</style>

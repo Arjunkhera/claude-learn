@@ -1,0 +1,105 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Cookbooks">
+  <div class="page">
+    <header class="page-header">
+      <h1>Cookbooks</h1>
+      <p>Real workflows. Multiple features. Copy and adapt.</p>
+    </header>
+
+    <div class="filters">
+      <button class="filter-pill active">All</button>
+      <button class="filter-pill">Automation</button>
+      <button class="filter-pill">Code Quality</button>
+      <button class="filter-pill">Project Setup</button>
+      <button class="filter-pill">CI/CD</button>
+      <button class="filter-pill">Team Workflows</button>
+    </div>
+
+    <div class="cookbook-grid">
+      <div class="cookbook-card placeholder">
+        <h3>Content coming soon</h3>
+        <p>Cookbooks will be populated in Phase 3.</p>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .page {
+    max-width: var(--page-width);
+    margin: 0 auto;
+    padding: 3rem 1.5rem;
+  }
+
+  .page-header {
+    margin-bottom: 2rem;
+  }
+
+  .page-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .page-header p {
+    color: var(--color-text-muted);
+    font-size: 1.05rem;
+  }
+
+  .filters {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .filter-pill {
+    padding: 0.4rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-surface);
+    font-size: 0.85rem;
+    font-family: var(--font-sans);
+    cursor: pointer;
+    color: var(--color-text-muted);
+  }
+
+  .filter-pill.active {
+    background: var(--color-accent);
+    color: white;
+    border-color: var(--color-accent);
+  }
+
+  .cookbook-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .cookbook-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+  }
+
+  .placeholder {
+    border-style: dashed;
+    text-align: center;
+    padding: 3rem 1.5rem;
+  }
+
+  .placeholder h3 {
+    color: var(--color-text-muted);
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .placeholder p {
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+  }
+</style>

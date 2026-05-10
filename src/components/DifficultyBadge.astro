@@ -1,0 +1,49 @@
+---
+interface Props {
+  difficulty: 'beginner' | 'intermediate' | 'advanced' | 'expert';
+  track?: '101' | '201' | '301' | '401';
+}
+
+const { difficulty, track } = Astro.props;
+
+const config = {
+  beginner:     { label: '101 · Beginner',     color: '#16a34a', bg: '#f0fdf4', border: '#86efac' },
+  intermediate: { label: '201 · Intermediate', color: '#2563eb', bg: '#eff6ff', border: '#93c5fd' },
+  advanced:     { label: '301 · Advanced',     color: '#7c3aed', bg: '#f5f3ff', border: '#c4b5fd' },
+  expert:       { label: '401 · Expert',       color: '#dc2626', bg: '#fef2f2', border: '#fca5a5' },
+};
+
+// If track is provided, override the display label
+const trackLabels: Record<string, string> = {
+  '101': '101',
+  '201': '201',
+  '301': '301',
+  '401': '401',
+};
+
+const { label: baseLabel, color, bg, border } = config[difficulty];
+const label = track ? `${trackLabels[track]} · ${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}` : baseLabel;
+---
+
+<span
+  class="difficulty-badge"
+  style={`--badge-color: ${color}; --badge-bg: ${bg}; --badge-border: ${border};`}
+>
+  {label}
+</span>
+
+<style>
+  .difficulty-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--badge-color);
+    background: var(--badge-bg);
+    border: 1px solid var(--badge-border);
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+</style>

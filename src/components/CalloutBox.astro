@@ -1,0 +1,89 @@
+---
+interface Props {
+  type: 'tip' | 'watch-out' | 'try-it';
+  title?: string;
+}
+
+const { type, title } = Astro.props;
+
+const config = {
+  'tip': {
+    icon: '💡',
+    defaultTitle: 'Tip',
+    colorVar: '#16a34a',
+    bgColor: '#f0fdf4',
+    borderColor: '#86efac',
+  },
+  'watch-out': {
+    icon: '⚠️',
+    defaultTitle: 'Watch Out',
+    colorVar: '#d97706',
+    bgColor: '#fffbeb',
+    borderColor: '#fcd34d',
+  },
+  'try-it': {
+    icon: '🧪',
+    defaultTitle: 'Try It',
+    colorVar: '#2563eb',
+    bgColor: '#eff6ff',
+    borderColor: '#93c5fd',
+  },
+};
+
+const { icon, defaultTitle, colorVar, bgColor, borderColor } = config[type];
+const displayTitle = title ?? defaultTitle;
+---
+
+<aside
+  class="callout"
+  style={`--callout-color: ${colorVar}; --callout-bg: ${bgColor}; --callout-border: ${borderColor};`}
+>
+  <div class="callout-header">
+    <span class="callout-icon" aria-hidden="true">{icon}</span>
+    <span class="callout-title">{displayTitle}</span>
+  </div>
+  <div class="callout-body">
+    <slot />
+  </div>
+</aside>
+
+<style>
+  .callout {
+    background: var(--callout-bg);
+    border: 1px solid var(--callout-border);
+    border-left: 4px solid var(--callout-color);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+    margin: 1.5rem 0;
+  }
+
+  .callout-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .callout-icon {
+    font-size: 1rem;
+    line-height: 1;
+  }
+
+  .callout-title {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--callout-color);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .callout-body {
+    font-size: 0.9rem;
+    line-height: 1.65;
+    color: var(--color-text);
+  }
+
+  .callout-body :global(p:last-child) {
+    margin-bottom: 0;
+  }
+</style>
