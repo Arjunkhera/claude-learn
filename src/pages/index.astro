@@ -42,6 +42,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   </section>
 </BaseLayout>
 
+<script>
+  // Navigate to /search?q=<query> when the user presses Enter in the hero search bar
+  const input = document.querySelector<HTMLInputElement>('.hero .search-bar input');
+  input?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && input.value.trim()) {
+      window.location.href = `/search?q=${encodeURIComponent(input.value.trim())}`;
+    }
+  });
+</script>
+
 <style>
   .hero {
     max-width: var(--page-width);

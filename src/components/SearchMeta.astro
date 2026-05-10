@@ -1,0 +1,36 @@
+---
+/**
+ * SearchMeta — drop this into content page layouts to tag content for Pagefind indexing.
+ *
+ * Usage in a layout wrapper:
+ *   <SearchMeta pillar="storybooks" title={title} />
+ *   <div data-pagefind-body>
+ *     <slot />
+ *   </div>
+ *
+ * Props:
+ *   pillar  — one of: storybooks | cookbooks | glossary | changelog
+ *   title   — page title (used as pagefind-meta "title")
+ *   tags    — optional array of extra string tags
+ */
+
+interface Props {
+  pillar: 'storybooks' | 'cookbooks' | 'glossary' | 'changelog';
+  title: string;
+  tags?: string[];
+}
+
+const { pillar, title, tags = [] } = Astro.props;
+---
+
+{/* Hidden metadata block — Pagefind reads these at index time, not shown to users */}
+<div
+  style="display:none"
+  data-pagefind-meta={`title:${title}`}
+  data-pagefind-filter={`pillar[data-pillar]`}
+  data-pillar={pillar}
+>
+  {tags.map((tag) => (
+    <span data-pagefind-filter={`tag[data-tag]`} data-tag={tag}></span>
+  ))}
+</div>

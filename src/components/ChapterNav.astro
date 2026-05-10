@@ -1,0 +1,126 @@
+---
+interface NavItem {
+  href: string;
+  title: string;
+}
+
+interface Props {
+  prev?: NavItem;
+  next?: NavItem;
+}
+
+const { prev, next } = Astro.props;
+---
+
+<nav class="chapter-nav" aria-label="Chapter navigation">
+  <div class="chapter-nav-inner">
+    {prev ? (
+      <a href={prev.href} class="chapter-nav-item chapter-nav-prev">
+        <span class="chapter-nav-arrow" aria-hidden="true">←</span>
+        <span class="chapter-nav-content">
+          <span class="chapter-nav-label">Previous Chapter</span>
+          <span class="chapter-nav-title">{prev.title}</span>
+        </span>
+      </a>
+    ) : <div />}
+
+    {next ? (
+      <a href={next.href} class="chapter-nav-item chapter-nav-next">
+        <span class="chapter-nav-content">
+          <span class="chapter-nav-label">Next Chapter</span>
+          <span class="chapter-nav-title">{next.title}</span>
+        </span>
+        <span class="chapter-nav-arrow" aria-hidden="true">→</span>
+      </a>
+    ) : <div />}
+  </div>
+</nav>
+
+<style>
+  .chapter-nav {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .chapter-nav-inner {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .chapter-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.25rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    text-decoration: none;
+    flex: 1;
+    max-width: 48%;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .chapter-nav-item:hover {
+    border-color: var(--color-accent);
+    box-shadow: 0 2px 8px rgba(232, 89, 12, 0.1);
+    text-decoration: none;
+  }
+
+  .chapter-nav-prev {
+    align-items: center;
+  }
+
+  .chapter-nav-next {
+    align-items: center;
+    text-align: right;
+    margin-left: auto;
+    justify-content: flex-end;
+  }
+
+  .chapter-nav-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .chapter-nav-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+  }
+
+  .chapter-nav-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  .chapter-nav-arrow {
+    font-size: 1.25rem;
+    color: var(--color-accent);
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 768px) {
+    .chapter-nav-inner {
+      flex-direction: column;
+    }
+
+    .chapter-nav-item {
+      max-width: 100%;
+    }
+
+    .chapter-nav-next {
+      flex-direction: row-reverse;
+      text-align: left;
+      justify-content: flex-start;
+      margin-left: 0;
+    }
+  }
+</style>

@@ -1,0 +1,57 @@
+---
+interface Props {
+  current: number;
+  total: number;
+  track: '101' | '201' | '301' | '401';
+}
+
+const { current, total, track } = Astro.props;
+
+const percent = Math.round((current / total) * 100);
+
+const trackColors: Record<string, string> = {
+  '101': 'var(--color-101)',
+  '201': 'var(--color-201)',
+  '301': 'var(--color-301)',
+  '401': 'var(--color-401)',
+};
+
+const color = trackColors[track] ?? 'var(--color-accent)';
+---
+
+<div class="track-progress">
+  <div class="track-progress-bar" role="progressbar" aria-valuenow={current} aria-valuemin={1} aria-valuemax={total} aria-label={`Chapter ${current} of ${total}`}>
+    <div class="track-progress-fill" style={`width: ${percent}%; background: ${color};`}></div>
+  </div>
+  <span class="track-progress-label">Chapter {current} of {total}</span>
+</div>
+
+<style>
+  .track-progress {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .track-progress-bar {
+    flex: 1;
+    height: 4px;
+    background: var(--color-border);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .track-progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.3s ease;
+  }
+
+  .track-progress-label {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+    font-weight: 500;
+  }
+</style>
