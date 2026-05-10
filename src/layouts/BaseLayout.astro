@@ -1,0 +1,121 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = 'Learn Claude Code — from first-timer to power user' } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{title} | Claude Learn</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <nav class="nav">
+      <div class="nav-inner">
+        <a href="/" class="nav-logo">Claude Learn</a>
+        <div class="nav-links">
+          <a href="/storybooks">Storybooks</a>
+          <a href="/cookbooks">Cookbooks</a>
+          <a href="/glossary">Glossary</a>
+          <a href="/changelog">Changelog</a>
+        </div>
+        <a href="/search" class="nav-search" aria-label="Search">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
+          </svg>
+        </a>
+      </div>
+    </nav>
+    <main>
+      <slot />
+    </main>
+    <footer class="footer">
+      <p>Built by Arjun</p>
+    </footer>
+  </body>
+</html>
+
+<style>
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    height: var(--nav-height);
+    display: flex;
+    align-items: center;
+  }
+
+  .nav-inner {
+    max-width: var(--page-width);
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .nav-logo {
+    font-weight: 700;
+    font-size: 1.125rem;
+    color: var(--color-text);
+  }
+
+  .nav-logo:hover {
+    text-decoration: none;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+  }
+
+  .nav-links a {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .nav-links a:hover {
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  .nav-search {
+    color: var(--color-text-muted);
+  }
+
+  .nav-search:hover {
+    color: var(--color-text);
+  }
+
+  .footer {
+    max-width: var(--page-width);
+    margin: 0 auto;
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  @media (max-width: 768px) {
+    .nav-links {
+      gap: 1rem;
+      font-size: 0.8rem;
+    }
+  }
+</style>

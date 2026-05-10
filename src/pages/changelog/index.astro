@@ -1,0 +1,91 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Changelog">
+  <div class="page">
+    <header class="page-header">
+      <h1>What's New</h1>
+      <p>Stay up to date with Claude Code features, enhancements, and changes.</p>
+    </header>
+
+    <div class="filters">
+      <button class="filter-pill active">All</button>
+      <button class="filter-pill new">New</button>
+      <button class="filter-pill enhanced">Enhanced</button>
+      <button class="filter-pill deprecated">Deprecated</button>
+    </div>
+
+    <div class="entries">
+      <div class="entry placeholder">
+        <p>Changelog entries will be populated in Phase 3.</p>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .page {
+    max-width: var(--content-width);
+    margin: 0 auto;
+    padding: 3rem 1.5rem;
+  }
+
+  .page-header {
+    margin-bottom: 2rem;
+  }
+
+  .page-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .page-header p {
+    color: var(--color-text-muted);
+    font-size: 1.05rem;
+  }
+
+  .filters {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .filter-pill {
+    padding: 0.4rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-surface);
+    font-size: 0.85rem;
+    font-family: var(--font-sans);
+    cursor: pointer;
+    color: var(--color-text-muted);
+  }
+
+  .filter-pill.active {
+    background: var(--color-text);
+    color: white;
+    border-color: var(--color-text);
+  }
+
+  .filter-pill.new { border-color: var(--color-badge-new); color: var(--color-badge-new); }
+  .filter-pill.enhanced { border-color: var(--color-badge-enhanced); color: var(--color-badge-enhanced); }
+  .filter-pill.deprecated { border-color: var(--color-badge-deprecated); color: var(--color-badge-deprecated); }
+
+  .entries {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .entry.placeholder {
+    background: var(--color-surface);
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: 0.925rem;
+  }
+</style>
