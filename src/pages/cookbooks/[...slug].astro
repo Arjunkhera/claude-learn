@@ -4,6 +4,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import DifficultyBadge from '../../components/DifficultyBadge.astro';
 import FeaturePill from '../../components/FeaturePill.astro';
 import CrossLinkCard from '../../components/CrossLinkCard.astro';
+import { resolveLinks, getGlossaryBacklinksForCookbook } from '../../lib/cross-links';
 
 export async function getStaticPaths() {
   const all = await getCollection('cookbooks');
@@ -31,6 +32,19 @@ const categoryLabels: Record<string, string> = {
 };
 
 const categoryLabel = categoryLabels[entry.data.category] ?? entry.data.category;
+
+// Resolve prerequisites to real titles
+const resolvedPrereqs = await resolveLinks(entry.data.prerequisites);
+
+// Resolve features_used (glossary slugs) to real titles
+const resolvedFeatures = await resolveLinks(
+  entry.data.features_used.map((f) => `glossary/${f}`)
+);
+
+// Build canonical link for this cookbook (for backlink lookup)
+const cookbookLink = `cookbooks/${entry.id}`;
+const glossaryBacklinks = await getGlossaryBacklinksForCookbook(cookbookLink);
+const hasGlossaryBacklinks = glossaryBacklinks.length > 0;
 ---
 
 <BaseLayout title={entry.data.title} description={entry.data.description}>
@@ -69,27 +83,18 @@ const categoryLabel = categoryLabels[entry.data.category] ?? entry.data.category
         )}
 
         <!-- Prerequisites -->
-        {entry.data.prerequisites.length > 0 && (
+        {resolvedPrereqs.length > 0 && (
           <section class="prereq-section">
             <h2 class="section-label">Prerequisites</h2>
             <div class="prereq-links">
-              {entry.data.prerequisites.map((prereq) => {
-                const parts = prereq.split('/');
-                const label = parts[parts.length - 1]?.replace(/-/g, ' ') ?? prereq;
-                const pillar = prereq.startsWith('storybooks/101') ? '101'
-                  : prereq.startsWith('storybooks/201') ? '201'
-                  : prereq.startsWith('storybooks/301') ? '301'
-                  : prereq.startsWith('storybooks/401') ? '401'
-                  : 'glossary';
-                return (
-                  <CrossLinkCard
-                    href={`/${prereq}`}
-                    pillar={pillar}
-                    title={label.charAt(0).toUpperCase() + label.slice(1)}
-                    preview="Read this first"
-                  />
-                );
-              })}
+              {resolvedPrereqs.map((prereq) => (
+                <CrossLinkCard
+                  href={prereq.href}
+                  pillar={prereq.pillar}
+                  title={prereq.title}
+                  preview="Read this first"
+                />
+              ))}
             </div>
           </section>
         )}
@@ -102,28 +107,45 @@ const categoryLabel = categoryLabels[entry.data.category] ?? entry.data.category
         </div>
 
         <!-- Cross-links at bottom -->
-        <aside class="bottom-links">
-          <h3 class="bottom-links-title">Continue Learning</h3>
-          <div class="bottom-links-grid">
-            {entry.data.prerequisites.map((prereq) => {
-              const parts = prereq.split('/');
-              const label = parts[parts.length - 1]?.replace(/-/g, ' ') ?? prereq;
-              const pillar = prereq.startsWith('storybooks/101') ? '101'
-                : prereq.startsWith('storybooks/201') ? '201'
-                : prereq.startsWith('storybooks/301') ? '301'
-                : prereq.startsWith('storybooks/401') ? '401'
-                : 'glossary';
-              return (
+        {(resolvedPrereqs.length > 0 || resolvedFeatures.length > 0 || hasGlossaryBacklinks) && (
+          <aside class="bottom-links">
+            <h3 class="bottom-links-title">Continue Learning</h3>
+            <div class="bottom-links-grid">
+              {resolvedPrereqs.map((prereq) => (
                 <CrossLinkCard
-                  href={`/${prereq}`}
-                  pillar={pillar}
-                  title={label.charAt(0).toUpperCase() + label.slice(1)}
+                  href={prereq.href}
+                  pillar={prereq.pillar}
+                  title={prereq.title}
                   preview="Related storybook chapter"
                 />
-              );
-            })}
-          </div>
-        </aside>
+              ))}
+              {resolvedFeatures.map((feat) => (
+                <CrossLinkCard
+                  href={feat.href}
+                  pillar={feat.pillar}
+                  title={feat.title}
+                  preview={feat.preview}
+                />
+              ))}
+            </div>
+
+            {hasGlossaryBacklinks && (
+              <div class="referenced-section">
+                <h3 class="bottom-links-title">Referenced in Glossary</h3>
+                <div class="bottom-links-grid">
+                  {glossaryBacklinks.map((g) => (
+                    <CrossLinkCard
+                      href={`/glossary/${g.id}`}
+                      pillar="glossary"
+                      title={g.data.title}
+                      preview={`Glossary — ${g.data.category}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </aside>
+        )}
       </article>
     </div>
   </div>
@@ -297,19 +319,53 @@ const categoryLabel = categoryLabels[entry.data.category] ?? entry.data.category
     margin-bottom: 0.75rem;
   }
 
+  .referenced-section {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+  }
+
   .bottom-links-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 0.75rem;
   }
 
+  /* Code blocks scroll, don't overflow */
+  .prose :global(pre) {
+    overflow-x: auto;
+    max-width: 100%;
+    white-space: pre;
+  }
+
+  /* Markdown tables */
+  .prose :global(table) {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+  }
+
   @media (max-width: 768px) {
+    .cookbook-page {
+      padding: 1.5rem 1.25rem 3rem;
+    }
+
     .cookbook-title {
       font-size: 1.5rem;
     }
 
     .bottom-links-grid {
       grid-template-columns: 1fr;
+    }
+
+    .feature-pills {
+      gap: 0.35rem;
+    }
+
+    .breadcrumb {
+      font-size: 0.8rem;
+      gap: 0.35rem;
     }
   }
 </style>

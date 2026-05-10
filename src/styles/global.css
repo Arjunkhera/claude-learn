@@ -39,6 +39,7 @@ html {
   background: var(--color-bg);
   color: var(--color-text);
   line-height: 1.6;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -77,4 +78,64 @@ pre {
 pre code {
   background: none;
   padding: 0;
+}
+
+/* Responsive images */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Markdown-rendered code block horizontal scroll */
+.prose pre,
+.chapter-content pre {
+  overflow-x: auto;
+  max-width: 100%;
+  white-space: pre;
+}
+
+/* Markdown-rendered tables */
+.prose table,
+.chapter-content table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  margin: 1.5rem 0;
+}
+
+.prose th,
+.chapter-content th {
+  background: #1e1e2e;
+  color: #cdd6f4;
+  font-weight: 600;
+  text-align: left;
+  padding: 0.6rem 1rem;
+  border: 1px solid #313244;
+}
+
+.prose td,
+.chapter-content td {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--color-border);
+}
+
+.prose tr:nth-child(even),
+.chapter-content tr:nth-child(even) {
+  background: var(--color-bg);
+}
+
+/* Scrollable table wrapper for markdown-rendered tables on mobile */
+.prose .table-wrapper,
+.chapter-content .table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 1.5rem 0;
+}
+
+/* Auto-wrap tables in a scrollable div via global selector */
+@media (max-width: 768px) {
+  .prose table,
+  .chapter-content table {
+    min-width: 480px;
+  }
 }

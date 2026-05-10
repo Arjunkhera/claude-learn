@@ -7,6 +7,7 @@ interface Props {
 }
 
 const { title, description = 'Learn Claude Code — from first-timer to power user' } = Astro.props;
+const pageTitle = `${title} | Claude Learn`;
 ---
 
 <!doctype html>
@@ -15,53 +16,150 @@ const { title, description = 'Learn Claude Code — from first-timer to power us
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
-    <title>{title} | Claude Learn</title>
+    <meta name="theme-color" content="#fffbf7" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Claude Learn" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary" />
+
+    <title>{pageTitle}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   </head>
   <body>
-    <nav class="nav">
+    <!-- Skip to content -->
+    <a href="#main-content" class="skip-link">Skip to content</a>
+
+    <nav class="nav" aria-label="Main navigation">
       <div class="nav-inner">
         <a href="/" class="nav-logo">Claude Learn</a>
-        <div class="nav-links">
+
+        <!-- Desktop links -->
+        <div class="nav-links" id="nav-links">
           <a href="/storybooks">Storybooks</a>
           <a href="/cookbooks">Cookbooks</a>
           <a href="/glossary">Glossary</a>
           <a href="/changelog">Changelog</a>
         </div>
-        <a href="/search" class="nav-search" aria-label="Search">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
-          </svg>
-        </a>
+
+        <div class="nav-right">
+          <a href="/search" class="nav-search" aria-label="Search">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
+            </svg>
+          </a>
+
+          <!-- Hamburger button (mobile only) -->
+          <button
+            class="hamburger"
+            id="hamburger-btn"
+            aria-expanded="false"
+            aria-controls="mobile-menu"
+            aria-label="Toggle navigation menu"
+          >
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile menu -->
+      <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+        <a href="/storybooks">Storybooks</a>
+        <a href="/cookbooks">Cookbooks</a>
+        <a href="/glossary">Glossary</a>
+        <a href="/changelog">Changelog</a>
       </div>
     </nav>
-    <main>
+
+    <main id="main-content">
       <slot />
     </main>
+
     <footer class="footer">
       <p>Built by Arjun</p>
     </footer>
   </body>
 </html>
 
+<script>
+  const btn = document.getElementById('hamburger-btn');
+  const menu = document.getElementById('mobile-menu');
+
+  function closeMenu() {
+    btn?.setAttribute('aria-expanded', 'false');
+    menu?.setAttribute('aria-hidden', 'true');
+    menu?.classList.remove('is-open');
+    btn?.classList.remove('is-open');
+  }
+
+  btn?.addEventListener('click', () => {
+    const isOpen = menu?.classList.contains('is-open');
+    if (isOpen) {
+      closeMenu();
+    } else {
+      btn.setAttribute('aria-expanded', 'true');
+      menu?.setAttribute('aria-hidden', 'false');
+      menu?.classList.add('is-open');
+      btn.classList.add('is-open');
+    }
+  });
+
+  // Close when a mobile-menu link is clicked
+  menu?.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', closeMenu);
+  });
+
+  // Close on Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeMenu();
+  });
+</script>
+
 <style>
+  /* Skip link */
+  .skip-link {
+    position: absolute;
+    top: -100%;
+    left: 1rem;
+    background: var(--color-accent);
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    font-size: 0.875rem;
+    font-weight: 600;
+    z-index: 999;
+    text-decoration: none;
+    transition: top 0.15s;
+  }
+
+  .skip-link:focus {
+    top: 0;
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+  }
+
+  /* Nav */
   .nav {
     position: sticky;
     top: 0;
     z-index: 100;
     background: var(--color-surface);
     border-bottom: 1px solid var(--color-border);
-    height: var(--nav-height);
-    display: flex;
-    align-items: center;
   }
 
   .nav-inner {
     max-width: var(--page-width);
     margin: 0 auto;
     padding: 0 1.5rem;
+    height: var(--nav-height);
     width: 100%;
     display: flex;
     align-items: center;
@@ -72,6 +170,7 @@ const { title, description = 'Learn Claude Code — from first-timer to power us
     font-weight: 700;
     font-size: 1.125rem;
     color: var(--color-text);
+    flex-shrink: 0;
   }
 
   .nav-logo:hover {
@@ -94,14 +193,98 @@ const { title, description = 'Learn Claude Code — from first-timer to power us
     text-decoration: none;
   }
 
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
   .nav-search {
     color: var(--color-text-muted);
+    display: flex;
+    align-items: center;
   }
 
   .nav-search:hover {
     color: var(--color-text);
   }
 
+  /* Hamburger */
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 36px;
+    height: 36px;
+    padding: 6px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+  }
+
+  .hamburger:hover {
+    background: var(--color-bg);
+  }
+
+  .bar {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background: var(--color-text);
+    border-radius: 2px;
+    transition: transform 0.2s, opacity 0.2s;
+  }
+
+  /* Hamburger open state — X shape */
+  .hamburger.is-open .bar:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+
+  .hamburger.is-open .bar:nth-child(2) {
+    opacity: 0;
+  }
+
+  .hamburger.is-open .bar:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
+  /* Mobile menu */
+  .mobile-menu {
+    display: none;
+    flex-direction: column;
+    background: var(--color-surface);
+    border-top: 1px solid var(--color-border);
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease;
+  }
+
+  .mobile-menu.is-open {
+    max-height: 300px;
+  }
+
+  .mobile-menu a {
+    display: block;
+    padding: 0.875rem 1.5rem;
+    color: var(--color-text);
+    font-size: 1rem;
+    font-weight: 500;
+    border-bottom: 1px solid var(--color-border);
+    text-decoration: none;
+  }
+
+  .mobile-menu a:last-child {
+    border-bottom: none;
+  }
+
+  .mobile-menu a:hover {
+    background: var(--color-bg);
+    color: var(--color-accent);
+  }
+
+  /* Footer */
   .footer {
     max-width: var(--page-width);
     margin: 0 auto;
@@ -112,10 +295,18 @@ const { title, description = 'Learn Claude Code — from first-timer to power us
     border-top: 1px solid var(--color-border);
   }
 
+  /* Mobile breakpoint */
   @media (max-width: 768px) {
     .nav-links {
-      gap: 1rem;
-      font-size: 0.8rem;
+      display: none;
+    }
+
+    .hamburger {
+      display: flex;
+    }
+
+    .mobile-menu {
+      display: flex;
     }
   }
 </style>

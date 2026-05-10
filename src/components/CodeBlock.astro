@@ -54,12 +54,17 @@ const { filename } = Astro.props;
   .code-wrapper {
     position: relative;
     background: #1e1e2e;
+    overflow: hidden;
   }
 
   .code-wrapper :global(pre) {
     margin: 0;
     border-radius: 0;
     border: none;
+    overflow-x: auto;
+    max-width: 100%;
+    /* Pad right so long lines aren't hidden behind copy button */
+    padding-right: 3rem;
   }
 
   .copy-btn {
@@ -76,9 +81,12 @@ const { filename } = Astro.props;
     align-items: center;
     opacity: 0;
     transition: opacity 0.15s, background 0.15s;
+    /* Stay above scrollable content */
+    z-index: 1;
   }
 
-  .code-wrapper:hover .copy-btn {
+  .code-wrapper:hover .copy-btn,
+  .copy-btn:focus-visible {
     opacity: 1;
   }
 
@@ -90,5 +98,12 @@ const { filename } = Astro.props;
   .copy-btn[data-copied] {
     color: #a6e3a1;
     background: #1e3a2f;
+  }
+
+  /* On touch devices always show the copy button */
+  @media (hover: none) {
+    .copy-btn {
+      opacity: 1;
+    }
   }
 </style>

@@ -157,4 +157,37 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   .quickstart a {
     font-weight: 600;
   }
+
+  @media (max-width: 768px) {
+    .hero {
+      padding: 2.5rem 1.25rem 1.5rem;
+    }
+
+    .hero h1 {
+      font-size: 1.75rem;
+    }
+
+    .subtitle {
+      font-size: 1rem;
+    }
+
+    .search-bar {
+      max-width: 100%;
+      margin: 0;
+    }
+
+    .pillars {
+      padding: 1.5rem 1.25rem;
+    }
+
+    .quickstart {
+      padding: 1.5rem 1.25rem 3rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .pillars {
+      grid-template-columns: 1fr;
+    }
+  }
 </style>
